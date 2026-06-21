@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* ---- EcoLens token system ---- */
+  --color-ink: #1A1A17;
+  --color-forest: #0F2E1D;
+  --color-forest-light: #1C4A2E;
+  --color-sage: #4A7856;
+  --color-sage-light: #7FA98C;
+  --color-paper: #F7F4EC;
+  --color-paper-dim: #EFEADC;
+  --color-amber: #D4922A;
+  --color-amber-light: #F0C77F;
+  --color-coral: #E8634A;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+/* Visible keyboard focus, accessibility floor */
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+.card-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 46, 29, 0.12);
+}
+
+/* Receipt perforation edge — the signature motif */
+.receipt-edge {
+  position: relative;
+}
+.receipt-edge::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-image: radial-gradient(circle at 8px 0, transparent 4px, var(--color-paper) 4.5px);
+  background-size: 16px 8px;
+  background-repeat: repeat-x;
+}
