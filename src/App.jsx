@@ -90,7 +90,7 @@ export default function App() {
         {active === 'mood' && <MoodPage user={user} />}
         {active === 'leaderboard' && <LeaderboardPage />}
         {active === 'marketplace' && <MarketplacePage />}
-        {active === 'reports' && <ReportsPage />}
+        {active === 'reports' && <ReportsPage user={user} transactions={transactions} />}
       </div>
 
       <MobileNav active={active} onNavigate={setActive} />

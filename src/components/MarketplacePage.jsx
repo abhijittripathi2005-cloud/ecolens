@@ -1,5 +1,21 @@
-import { ShoppingBag, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { marketplaceItems } from '../data/mockMarketplace';
+
+import bottleImg from '../assets/marketplace/bottle.jpg';
+import toteImg from '../assets/marketplace/tote.jpg';
+import solarImg from '../assets/marketplace/solar.jpg';
+import cutleryImg from '../assets/marketplace/cutlery.jpg';
+import refillImg from '../assets/marketplace/refill.jpg';
+import produceImg from '../assets/marketplace/produce.jpg';
+
+const imageMap = {
+  bottle: bottleImg,
+  tote: toteImg,
+  solar: solarImg,
+  cutlery: cutleryImg,
+  refill: refillImg,
+  produce: produceImg,
+};
 
 export default function MarketplacePage() {
   return (
@@ -18,27 +34,34 @@ export default function MarketplacePage() {
         {marketplaceItems.map((item) => (
           <div
             key={item.id}
-            className="bg-white rounded-xl shadow-[0_2px_12px_rgba(15,46,29,0.08)] p-5 flex flex-col card-lift"
+            className="bg-white rounded-xl shadow-[0_2px_12px_rgba(15,46,29,0.08)] overflow-hidden flex flex-col card-lift"
           >
-            <div className="w-full aspect-square rounded-lg bg-paper-dim flex items-center justify-center mb-4">
-              <ShoppingBag className="w-8 h-8 text-sage" strokeWidth={1.5} />
+            <div className="w-full aspect-square bg-paper-dim overflow-hidden">
+              <img
+                src={imageMap[item.image]}
+                alt={item.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
 
-            <span className="text-[10px] font-mono uppercase tracking-wide text-sage mb-1">{item.tag}</span>
-            <h3 className="font-display text-base font-semibold text-ink leading-snug">{item.name}</h3>
-            <p className="text-xs text-ink/40 mb-3">{item.brand}</p>
+            <div className="p-5 flex flex-col flex-1">
+              <span className="text-[10px] font-mono uppercase tracking-wide text-sage mb-1">{item.tag}</span>
+              <h3 className="font-display text-base font-semibold text-ink leading-snug">{item.name}</h3>
+              <p className="text-xs text-ink/40 mb-3">{item.brand}</p>
 
-            <div className="mt-auto flex items-center justify-between pt-3 border-t border-dashed border-ink/15">
-              <div>
-                <p className="font-mono text-sm font-semibold text-ink">₹{item.price}</p>
-                <p className="text-[11px] text-sage">Saves {item.co2Saved}</p>
+              <div className="mt-auto flex items-center justify-between pt-3 border-t border-dashed border-ink/15">
+                <div>
+                  <p className="font-mono text-sm font-semibold text-ink">₹{item.price}</p>
+                  <p className="text-[11px] text-sage">Saves {item.co2Saved}</p>
+                </div>
+                <button
+                  disabled
+                  className="flex items-center gap-1 text-xs font-semibold text-ink/30 cursor-not-allowed px-3 py-2 rounded-lg bg-paper-dim"
+                >
+                  View <ArrowUpRight className="w-3 h-3" strokeWidth={2.5} />
+                </button>
               </div>
-              <button
-                disabled
-                className="flex items-center gap-1 text-xs font-semibold text-ink/30 cursor-not-allowed px-3 py-2 rounded-lg bg-paper-dim"
-              >
-                View <ArrowUpRight className="w-3 h-3" strokeWidth={2.5} />
-              </button>
             </div>
           </div>
         ))}
