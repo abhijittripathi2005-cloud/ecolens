@@ -51,7 +51,7 @@ export default function LoginScreen() {
       {error && <p className="text-xs text-coral mt-4">{error}</p>}
 
       <p className="text-[11px] text-sage-light/50 mt-10 text-center max-w-xs">
-        Bug Busters 🐛 — Round 1 Idea Submission
+        Byte Brains 🐛 
       </p>
     </div>
   );

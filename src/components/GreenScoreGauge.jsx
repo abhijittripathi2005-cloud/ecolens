@@ -35,7 +35,7 @@ export default function GreenScoreGauge({ score = 68 }) {
 
       <p className="mt-4 text-sm font-medium text-amber-light">{tier}</p>
       <p className="text-xs text-sage-light text-center mt-1">
-        Top 18% among Bug Busters this week
+        Top 18% among Byte Brains this week
       </p>
     </div>
   );

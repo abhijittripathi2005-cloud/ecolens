@@ -47,7 +47,7 @@ export default function LeaderboardPage({ user, greenScore = 68 }) {
 
       {/* Leaderboard list */}
       <div className="bg-white rounded-xl shadow-[0_2px_12px_rgba(15,46,29,0.08)] p-6">
-        <h3 className="font-display text-lg font-semibold text-forest mb-4">Bug Busters Friends</h3>
+        <h3 className="font-display text-lg font-semibold text-forest mb-4">Byte Brains Friends</h3>
 
         <div className="space-y-1">
           {sorted.map((u, i) => (

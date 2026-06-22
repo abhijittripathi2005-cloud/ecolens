@@ -39,7 +39,7 @@ export default function Sidebar({ active, onNavigate }) {
 
       <div className="px-6 py-5 border-t border-forest-light/60">
         <p className="font-mono text-[11px] text-sage-light/70 leading-relaxed">
-          Bug Busters 🐛<br />Round 1 — Idea Submission
+          Byte Brains 🐛
         </p>
       </div>
     </aside>
