@@ -41,7 +41,7 @@ export default function DashboardPage({ transactions }) {
       </div>
 
       {/* AI Advisor — top billing, this is the wow factor */}
-      <AIAdvisorPanel />
+      <AIAdvisorPanel transactions={transactions} />
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

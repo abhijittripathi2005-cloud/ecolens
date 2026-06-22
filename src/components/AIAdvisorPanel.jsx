@@ -1,32 +1,45 @@
 import { useState } from 'react';
 import { Sparkles, IndianRupee, Leaf, RotateCw, AlertCircle } from 'lucide-react';
-import { mockSuggestions } from '../data/mockSuggestions';
 
 /**
  * AI Eco-Advisor panel.
- *
- * Wiring notes for Member C:
- * - `status` drives the four states below: 'idle' | 'loading' | 'loaded' | 'error'
- * - Replace `handleGenerate` with the real Claude API call. Keep the response
- *   shape as { suggestion, moneySaved, carbonSaved } per item — UI already expects it.
- * - `suggestions` state is the array to setState() with the parsed API result.
+ * Calls our own /api/advisor serverless function, which holds the Gemini
+ * API key server-side and never exposes it to the browser.
  */
-export default function AIAdvisorPanel() {
+export default function AIAdvisorPanel({ transactions = [] }) {
   const [status, setStatus] = useState('idle'); // idle | loading | loaded | error
   const [suggestions, setSuggestions] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  function handleGenerate() {
+  async function handleGenerate() {
+    if (transactions.length === 0) {
+      setErrorMessage('Add a few transactions first so there is something to analyze.');
+      setStatus('error');
+      return;
+    }
+
     setStatus('loading');
-    // --- Member C: replace this timeout with the real Claude API call ---
-    setTimeout(() => {
-      const success = true; // simulate occasional API failure for testing error state
-      if (success) {
-        setSuggestions(mockSuggestions);
-        setStatus('loaded');
-      } else {
-        setStatus('error');
+    setErrorMessage('');
+
+    try {
+      const res = await fetch('/api/advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactions: transactions.slice(0, 20) }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Request failed');
       }
-    }, 1600);
+
+      const data = await res.json();
+      setSuggestions(data.suggestions ?? []);
+      setStatus('loaded');
+    } catch (err) {
+      console.error('AI advisor request failed:', err);
+      setErrorMessage('Could not reach the advisor. Please try again.');
+      setStatus('error');
+    }
   }
 
   return (
@@ -39,7 +52,7 @@ export default function AIAdvisorPanel() {
           </div>
           <div>
             <h3 className="font-display text-lg font-semibold text-paper leading-tight">AI Eco-Advisor</h3>
-            <p className="text-[11px] text-sage-light">Personalized suggestions, powered by Claude</p>
+            <p className="text-[11px] text-sage-light">Personalized suggestions, powered by Gemini</p>
           </div>
         </div>
         {status === 'loaded' && (
@@ -91,7 +104,7 @@ export default function AIAdvisorPanel() {
           <div className="text-center py-8">
             <AlertCircle className="w-8 h-8 text-coral mx-auto mb-3" strokeWidth={1.8} />
             <p className="text-sm font-medium text-ink mb-1">Couldn't reach the advisor</p>
-            <p className="text-xs text-ink/50 mb-4">Check your connection and try again.</p>
+            <p className="text-xs text-ink/50 mb-4">{errorMessage || 'Please try again.'}</p>
             <button
               onClick={handleGenerate}
               className="text-xs font-semibold text-forest border border-forest/20 hover:bg-paper-dim px-4 py-2 rounded-lg transition-colors"

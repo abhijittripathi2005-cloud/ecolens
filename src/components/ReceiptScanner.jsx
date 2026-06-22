@@ -2,24 +2,29 @@ import { useState, useRef } from 'react';
 import { Receipt, Upload, X, AlertCircle, Check, RotateCw } from 'lucide-react';
 import { categories } from '../data/mockData';
 import { estimateCO2 } from '../data/carbonEngine';
-import { mockParsedReceipt } from '../data/mockReceipt';
 
 function catMeta(id) {
   return categories.find((c) => c.id === id) ?? { icon: '📦', label: id };
 }
 
+// Converts a File object into a base64 string (without the data: prefix),
+// which is what Gemini's inlineData field expects.
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const base64 = typeof result === 'string' ? result.split(',')[1] : '';
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 /**
- * Receipt scanner.
- *
- * Wiring notes for Member C:
- * - `status`: 'empty' | 'preview' | 'loading' | 'parsed' | 'error'
- * - `imageFile` / `imagePreviewUrl` are set the moment a file is chosen — that part
- *   is done, you don't need to touch the file-picker logic.
- * - Replace `handleScan` with the real Claude API call. Send `imageFile` as base64
- *   (see anthropic_api_in_artifacts image handling pattern). On success, call
- *   setParsedData(result) with the shape from mockReceipt.js, then setStatus('parsed').
- * - On submit (handleConfirm), this calls onConfirm(transactionObject) which the
- *   parent wires to handleAddTransaction — same shape as the manual Add Transaction form.
+ * Receipt scanner. Calls our own /api/receipt serverless function, which
+ * holds the Gemini API key server-side and never exposes it to the browser.
  */
 export default function ReceiptScanner({ onConfirm }) {
   const [status, setStatus] = useState('empty');
@@ -27,6 +32,7 @@ export default function ReceiptScanner({ onConfirm }) {
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [category, setCategory] = useState('groceries');
+  const [errorMessage, setErrorMessage] = useState('');
   const inputRef = useRef(null);
 
   function handleFileSelect(e) {
@@ -37,19 +43,33 @@ export default function ReceiptScanner({ onConfirm }) {
     setStatus('preview');
   }
 
-  function handleScan() {
+  async function handleScan() {
+    if (!imageFile) return;
     setStatus('loading');
-    // --- Member C: replace this timeout with the real Claude API OCR call ---
-    setTimeout(() => {
-      const success = true;
-      if (success) {
-        setParsedData(mockParsedReceipt);
-        setCategory(mockParsedReceipt.suggestedCategory);
-        setStatus('parsed');
-      } else {
-        setStatus('error');
+    setErrorMessage('');
+
+    try {
+      const imageBase64 = await fileToBase64(imageFile);
+
+      const res = await fetch('/api/receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64, mimeType: imageFile.type }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Request failed');
       }
-    }, 1800);
+
+      const result = await res.json();
+      setParsedData(result);
+      setCategory(result.suggestedCategory || 'other');
+      setStatus('parsed');
+    } catch (err) {
+      console.error('Receipt scan failed:', err);
+      setErrorMessage('Try a clearer photo, or enter it manually.');
+      setStatus('error');
+    }
   }
 
   function handleConfirm() {
@@ -145,7 +165,7 @@ export default function ReceiptScanner({ onConfirm }) {
           <div className="text-center py-8">
             <AlertCircle className="w-8 h-8 text-coral mx-auto mb-3" strokeWidth={1.8} />
             <p className="text-sm font-medium text-ink mb-1">Couldn't read that receipt</p>
-            <p className="text-xs text-ink/50 mb-4">Try a clearer photo, or enter it manually.</p>
+            <p className="text-xs text-ink/50 mb-4">{errorMessage || 'Try a clearer photo, or enter it manually.'}</p>
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={handleScan}
