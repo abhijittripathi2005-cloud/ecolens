@@ -1,5 +1,5 @@
 import { Flame, Trophy } from 'lucide-react';
-import { leaderboard } from '../data/mockLeaderboard';
+import { leaderboard as mockLeaderboard } from '../data/mockLeaderboard';
 
 function initials(name) {
   return name.replace(' (You)', '').split(' ').map((w) => w[0]).slice(0, 2).join('');
@@ -7,9 +7,17 @@ function initials(name) {
 
 const medalColors = ['#D4922A', '#9CA3AF', '#B5713A'];
 
-export default function LeaderboardPage() {
+export default function LeaderboardPage({ user, greenScore = 68 }) {
+  const firstName = user?.displayName?.split(' ')[0] || 'You';
+
+  // Build leaderboard with real user data replacing the "isYou" mock entry
+  const leaderboard = mockLeaderboard.map((u) =>
+    u.isYou ? { ...u, name: `${firstName} (You)`, score: greenScore } : u
+  );
+
   const sorted = [...leaderboard].sort((a, b) => b.score - a.score);
-  const you = leaderboard.find((u) => u.isYou);
+  const myRank = sorted.findIndex((u) => u.isYou) + 1;
+  const topPct = Math.round((myRank / sorted.length) * 100);
 
   return (
     <main className="px-6 md:px-10 py-8 space-y-6 page-fade-in">
@@ -28,11 +36,11 @@ export default function LeaderboardPage() {
             Your rank
           </p>
           <p className="font-display text-xl font-semibold">
-            #{sorted.findIndex((u) => u.isYou) + 1} of {sorted.length} — Top {Math.round(((sorted.findIndex((u) => u.isYou) + 1) / sorted.length) * 100)}%
+            #{myRank} of {sorted.length} — Top {topPct}%
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="font-display text-3xl font-semibold text-amber-light">{you?.score}</p>
+          <p className="font-display text-3xl font-semibold text-amber-light">{greenScore}</p>
           <p className="text-[11px] text-sage-light">score</p>
         </div>
       </div>
@@ -42,11 +50,11 @@ export default function LeaderboardPage() {
         <h3 className="font-display text-lg font-semibold text-forest mb-4">Bug Busters Friends</h3>
 
         <div className="space-y-1">
-          {sorted.map((user, i) => (
+          {sorted.map((u, i) => (
             <div
-              key={user.id}
+              key={u.id}
               className={`flex items-center gap-4 px-3 py-3 rounded-lg ${
-                user.isYou ? 'bg-paper-dim border border-dashed border-amber/50' : ''
+                u.isYou ? 'bg-paper-dim border border-dashed border-amber/50' : ''
               }`}
             >
               <span
@@ -56,22 +64,31 @@ export default function LeaderboardPage() {
                 {i + 1}
               </span>
 
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
-                style={{ backgroundColor: user.avatarColor }}
-              >
-                {initials(user.name)}
-              </div>
+              {u.isYou && user?.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="w-9 h-9 rounded-full shrink-0 object-cover"
+                />
+              ) : (
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
+                  style={{ backgroundColor: u.avatarColor }}
+                >
+                  {initials(u.name)}
+                </div>
+              )}
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink truncate">{user.name}</p>
+                <p className="text-sm font-medium text-ink truncate">{u.name}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <Flame className="w-3 h-3 text-coral" strokeWidth={2.5} />
-                  <span className="text-[11px] text-ink/40">{user.streak} day streak</span>
+                  <span className="text-[11px] text-ink/40">{u.streak} day streak</span>
                 </div>
               </div>
 
-              <span className="font-mono text-sm font-semibold text-forest shrink-0">{user.score}</span>
+              <span className="font-mono text-sm font-semibold text-forest shrink-0">{u.score}</span>
             </div>
           ))}
         </div>

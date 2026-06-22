@@ -1,10 +1,23 @@
+import { useState, useEffect } from 'react';
 import MoodCheckIn from './MoodCheckIn';
 import MoodHistory from './MoodHistory';
 import MoodInsight from './MoodInsight';
-import { saveMoodEntry } from '../data/moodApi';
+import { saveMoodEntry, subscribeToMoods } from '../data/moodApi';
 
-export default function MoodPage({ user }) {
+export default function MoodPage({ user, transactions = [] }) {
   const today = new Date().toISOString().slice(0, 10);
+  const [moods, setMoods] = useState([]);
+
+  // Subscribe to real mood entries from Firestore
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = subscribeToMoods(
+      user.uid,
+      (liveMoods) => setMoods(liveMoods),
+      (err) => console.error('Mood subscription error:', err)
+    );
+    return unsubscribe;
+  }, [user]);
 
   async function handleCheckIn(moodId) {
     if (!user) return;
@@ -24,10 +37,10 @@ export default function MoodPage({ user }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <MoodCheckIn onCheckIn={handleCheckIn} />
-        <MoodInsight />
+        <MoodInsight moods={moods} transactions={transactions} />
       </div>
 
-      <MoodHistory />
+      <MoodHistory moods={moods} />
     </main>
   );
 }

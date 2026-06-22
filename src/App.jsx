@@ -14,6 +14,7 @@ import OnboardingScreen from './components/OnboardingScreen';
 import LoginScreen from './components/LoginScreen';
 import AddTransactionModal from './components/AddTransactionModal';
 import { addTransaction, subscribeToTransactions } from './data/transactionsApi';
+import { calculateGreenScore } from './data/carbonEngine';
 import { transactions as initialTransactions } from './data/mockData';
 
 export default function App() {
@@ -87,8 +88,8 @@ export default function App() {
 
         {active === 'dashboard' && <DashboardPage transactions={transactions} />}
         {active === 'transactions' && <TransactionsPage transactions={transactions} />}
-        {active === 'mood' && <MoodPage user={user} />}
-        {active === 'leaderboard' && <LeaderboardPage />}
+        {active === 'mood' && <MoodPage user={user} transactions={transactions} />}
+        {active === 'leaderboard' && <LeaderboardPage user={user} greenScore={calculateGreenScore(transactions)} />}
         {active === 'marketplace' && <MarketplacePage />}
         {active === 'reports' && <ReportsPage user={user} transactions={transactions} />}
       </div>
